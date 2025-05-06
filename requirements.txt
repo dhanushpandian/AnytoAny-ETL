@@ -1,0 +1,10 @@
+streamlit==1.22.0
+langchain==0.0.175
+python-dotenv==1.0.0
+psycopg2-binary==2.9.5
+pymongo==4.5.0
+pyodbc==4.0.35
+sqlalchemy==2.0.14
+pymysql==1.0.3
+sqlite3==3.36.0
+psycopg2-binary

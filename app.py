@@ -1,82 +1,73 @@
+# etl_app.py
 import streamlit as st
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage
-import os
-from dotenv import load_dotenv
+# from etl_utils.ui import render_db_ui, display_schema_preview, editable_code_section
+from modules.ui import render_db_ui, display_schema_preview, editable_code_section
+from modules.generator import generate_etl_code
+from modules.executor import run_etl_code
+# app.py
+from modules.validator import validate_and_fetch_schema
+from modules.validator import validate_db_connection
+from modules.executor import run_etl_script
 
-# Load environment variables
-load_dotenv()
+# app.py
 
-# Initialize Gemini
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
 
-# Helper function to render credential fields based on DB type
-def render_db_fields(prefix, db_type):
-    creds = {}
 
-    if db_type in ["PostgreSQL", "MySQL", "MSSQL"]:
-        creds["host"] = st.text_input(f"{prefix} Host")
-        creds["port"] = st.text_input(f"{prefix} Port")
-        creds["username"] = st.text_input(f"{prefix} Username")
-        creds["password"] = st.text_input(f"{prefix} Password", type="password")
-        creds["database"] = st.text_input(f"{prefix} Database Name")
-        creds["table"] = st.text_input(f"{prefix} Table Name")
-    elif db_type == "MongoDB":
-        creds["uri"] = st.text_input(f"{prefix} Mongo URI (e.g., mongodb+srv://...)")
-        creds["database"] = st.text_input(f"{prefix} Database Name")
-        creds["collection"] = st.text_input(f"{prefix} Collection Name")
-    elif db_type == "SQLite":
-        creds["file_path"] = st.text_input(f"{prefix} SQLite File Path")
-        creds["table"] = st.text_input(f"{prefix} Table Name")
+st.set_page_config(page_title=" Smart ETL", layout="wide")
+st.title("🔁Smart ETL Workflow")
 
-    return creds
-
-# Function to generate ETL code prompt
-def generate_etl_code_prompt(source_type, source_creds, target_type, target_creds, transformations):
-    return f"""
-You are a Python data engineer. Write a complete ETL script to:
-
-1. Connect to the **source** database:
-   - Type: {source_type}
-   - Credentials: {source_creds}
-
-2. Extract data from it.
-
-3. Apply the following transformations:
-   - {transformations}
-
-4. Load the transformed data into the **target** database:
-   - Type: {target_type}
-   - Credentials: {target_creds}
-
-Use the appropriate Python libraries (like `pymongo`, `psycopg2`, `pyodbc`, `sqlalchemy`, `sqlite3`, `pymysql`, etc.) depending on the DB types.
-Include all necessary imports and connection handling.
-"""
-
-# UI
-st.title("🔁 Smart ETL Code Generator (Mongo, MySQL, MSSQL, PostgreSQL, SQLite)")
-
+# --- Step 1: Select Source and Target DB Types ---
 db_types = ["PostgreSQL", "MySQL", "MSSQL", "MongoDB", "SQLite"]
 
 col1, col2 = st.columns(2)
 with col1:
     st.header("Source Database")
-    source_type = st.selectbox("Source DB Type", db_types, key="source_db")
-    source_creds = render_db_fields("Source", source_type)
+    source_type = st.selectbox("Source DB Type", db_types, key="src_type")
+    source_creds = render_db_ui("Source", source_type)
 
 with col2:
     st.header("Target Database")
-    target_type = st.selectbox("Target DB Type", db_types, key="target_db")
-    target_creds = render_db_fields("Target", target_type)
+    target_type = st.selectbox("Target DB Type", db_types, key="tgt_type")
+    target_creds = render_db_ui("Target", target_type)
 
-st.subheader("🛠️ Transformation Rules")
-transformations = st.text_area("Describe your transformations (natural language)", 
-    placeholder="e.g., Convert 'date' to DD-MM-YYYY, remove rows with null salary...")
+# --- Step 2: Validate connections and preview schema ---
+if st.button("🔍 Validate and Preview Schema"):
+    src_status, src_preview = validate_and_fetch_schema(source_type, source_creds)
+    tgt_status, tgt_preview = validate_and_fetch_schema(target_type, target_creds)
 
-if st.button("🚀 Generate ETL Code"):
-    with st.spinner("Calling Gemini to generate code..."):
-        prompt = generate_etl_code_prompt(source_type, source_creds, target_type, target_creds, transformations)
-        response = llm.invoke([HumanMessage(content=prompt)])
-        st.success("✅ ETL Code Generated")
-        st.code(response.content, language="python")
-        st.download_button("📥 Download Python Script", response.content, file_name="etl_script.py", mime="text/x-python")
+    if src_status and tgt_status:
+        st.success("Both connections successful! Previewing schemas:")
+        display_schema_preview("Source", src_preview, "green")
+        display_schema_preview("Target", tgt_preview, "orange")
+    else:
+        st.error("❌ Connection failed. Please check credentials.")
+    # app.py
+    st.subheader("Source Database Connection Status")
+    st.write(src_status)
+
+    if src_preview:
+        st.subheader("Source Database Preview (First 2 Rows)")
+        st.write(src_preview)
+
+# --- Step 3: Input transformation rules and generate code ---
+st.subheader("🛠️ Describe Transformations")
+transformations = st.text_area("What changes should be made to the data?", 
+    placeholder="e.g., Change column 'created_at' format, drop rows where salary is null...")
+
+if st.button("🧠 Generate ETL Code"):
+    etl_code = generate_etl_code(source_type, source_creds, target_type, target_creds, transformations)
+    st.session_state["etl_code"] = etl_code
+
+# --- Step 4: Show editable ETL code and allow execution ---
+if "etl_code" in st.session_state:
+    st.subheader("📝 Review and Edit Generated Code")
+    edited_code = editable_code_section(st.session_state["etl_code"])
+
+    col_run, col_dl = st.columns([1, 3])
+    with col_run:
+        if st.button("▶️ Run ETL Script"):
+            result = run_etl_script(edited_code)
+            st.text(result)
+
+    with col_dl:
+        st.download_button("📥 Download ETL Script", edited_code, "etl_script.py", mime="text/x-python")
