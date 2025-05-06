@@ -55,7 +55,9 @@ transformations = st.text_area("What changes should be made to the data?",
     placeholder="e.g., Change column 'created_at' format, drop rows where salary is null...")
 
 if st.button("🧠 Generate ETL Code"):
-    etl_code = generate_etl_code(source_type, source_creds, target_type, target_creds, transformations)
+    src_status, src_preview = validate_and_fetch_schema(source_type, source_creds)
+    tgt_status, tgt_preview = validate_and_fetch_schema(target_type, target_creds)
+    etl_code = generate_etl_code(source_type, source_creds, target_type, target_creds, transformations, src_preview, tgt_preview)
     st.session_state["etl_code"] = etl_code
 
 # --- Step 4: Show editable ETL code and allow execution ---

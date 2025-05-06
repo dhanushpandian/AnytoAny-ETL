@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
 
-def generate_etl_code(source_type, source_creds, target_type, target_creds, transformations):
+def generate_etl_code(source_type, source_creds, target_type, target_creds, transformations, src_preview, tgt_preview):
     prompt = f'''
-You are a Python data engineer. Write a full ETL script to:
+You are a Python data engineer. Write a full ETL script only without explaination to:
 
 1. Connect to source DB ({source_type}) using:
    {source_creds}
@@ -21,7 +21,10 @@ You are a Python data engineer. Write a full ETL script to:
 4. Load into target DB ({target_type}) using:
    {target_creds}
 
-Use appropriate libraries (psycopg2, pymysql, pymongo, pyodbc, sqlite3, pandas). Include imports and connection handling.
+Use appropriate libraries (psycopg2, pymysql, pymongo, pyodbc, sqlite3, pandas). Include imports and connection handling. use the below data as sample for the table
+sourcedb: {src_preview}
+and 
+destination: {tgt_preview}
 '''
     response = llm.invoke([HumanMessage(content=prompt)])
     return response.content
