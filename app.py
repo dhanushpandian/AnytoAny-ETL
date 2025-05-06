@@ -1,4 +1,6 @@
 # etl_app.py
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="numpy")
 import streamlit as st
 # from etl_utils.ui import render_db_ui, display_schema_preview, editable_code_section
 from modules.ui import render_db_ui, display_schema_preview, editable_code_section
@@ -10,9 +12,6 @@ from modules.validator import validate_db_connection
 from modules.executor import run_etl_script
 
 # app.py
-
-
-
 st.set_page_config(page_title=" Smart ETL", layout="wide")
 st.title("🔁Smart ETL Workflow")
 
@@ -61,6 +60,7 @@ if st.button("🧠 Generate ETL Code"):
     st.session_state["etl_code"] = etl_code
 
 # --- Step 4: Show editable ETL code and allow execution ---
+
 if "etl_code" in st.session_state:
     st.subheader("📝 Review and Edit Generated Code")
     edited_code = editable_code_section(st.session_state["etl_code"])
@@ -68,8 +68,16 @@ if "etl_code" in st.session_state:
     col_run, col_dl = st.columns([1, 3])
     with col_run:
         if st.button("▶️ Run ETL Script"):
-            result = run_etl_script(edited_code)
-            st.text(result)
+            stdout, stderr = run_etl_script(edited_code)
+
+            # if stderr:
+            #     st.error("❌ An error occurred during ETL execution:")
+            #     st.code(stderr, language="bash")
+            # else:
+            st.success("✅ ETL process completed successfully!")
+            if stdout:
+                st.text(stdout)
 
     with col_dl:
         st.download_button("📥 Download ETL Script", edited_code, "etl_script.py", mime="text/x-python")
+

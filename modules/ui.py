@@ -5,7 +5,7 @@ def db_credential_input(prefix, db_type):
     if db_type in ["PostgreSQL", "MySQL", "MSSQL"]:
         creds["host"] = st.text_input(f"{prefix} Host")
         creds["port"] = st.text_input(f"{prefix} Port")
-        creds["username"] = st.text_input(f"{prefix} Username")
+        creds["user"] = st.text_input(f"{prefix} Username")
         creds["password"] = st.text_input(f"{prefix} Password", type="password")
         creds["database"] = st.text_input(f"{prefix} Database Name")
         creds["table"] = st.text_input(f"{prefix} Table Name")
@@ -55,7 +55,7 @@ def render_db_ui(prefix, db_type):
     if db_type in ["PostgreSQL", "MySQL", "MSSQL"]:
         creds["host"] = st.text_input(f"{prefix} Host")
         creds["port"] = st.text_input(f"{prefix} Port")
-        creds["username"] = st.text_input(f"{prefix} Username")
+        creds["user"] = st.text_input(f"{prefix} Username")
         creds["password"] = st.text_input(f"{prefix} Password", type="password")
         creds["database"] = st.text_input(f"{prefix} Database Name")
         creds["table"] = st.text_input(f"{prefix} Table Name")
