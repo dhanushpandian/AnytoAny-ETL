@@ -1,6 +1,7 @@
 # etl_app.py
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy")
+
 import streamlit as st
 # from etl_utils.ui import render_db_ui, display_schema_preview, editable_code_section
 from modules.ui import render_db_ui, display_schema_preview, editable_code_section
@@ -31,22 +32,25 @@ with col2:
 
 # --- Step 2: Validate connections and preview schema ---
 if st.button("🔍 Validate and Preview Schema"):
-    src_status, src_preview = validate_and_fetch_schema(source_type, source_creds)
-    tgt_status, tgt_preview = validate_and_fetch_schema(target_type, target_creds)
-
+    src_status, src_preview ,src_schema = validate_and_fetch_schema(source_type, source_creds)
+    tgt_status, tgt_preview , tgt_schema = validate_and_fetch_schema(target_type, target_creds)
+    #print(tgt_preview,tgt_status)
+    print(source_type,source_creds,target_type,target_creds)
+    if tgt_preview ==[]:
+        print("-------------------Table dosent exists----------------")
     if src_status and tgt_status:
         st.success("Both connections successful! Previewing schemas:")
-        display_schema_preview("Source", src_preview, "green")
-        display_schema_preview("Target", tgt_preview, "orange")
+        display_schema_preview("Source", src_preview, src_schema,"green")
+        display_schema_preview("Target", tgt_preview, tgt_schema,"orange")
     else:
         st.error("❌ Connection failed. Please check credentials.")
     # app.py
-    st.subheader("Source Database Connection Status")
-    st.write(src_status)
+    # st.subheader("Source Database Connection Status")
+    # st.write(src_status)
 
-    if src_preview:
-        st.subheader("Source Database Preview (First 2 Rows)")
-        st.write(src_preview)
+    # if src_preview:
+    #     st.subheader("Source Database Preview (First 2 Rows)")
+    #     st.write(src_preview)
 
 # --- Step 3: Input transformation rules and generate code ---
 st.subheader("🛠️ Describe Transformations")

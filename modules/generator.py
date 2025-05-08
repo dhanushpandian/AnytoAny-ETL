@@ -33,7 +33,7 @@ Use appropriate libraries (psycopg2, pymysql, pymongo, pyodbc, sqlite3, pandas) 
 u need to use only the ones u need and understand the use case. Include imports and connection handling. use the below data as sample for the table
 sourcedb: {src_preview}
 and 
-destination u need to create a new table for the above requiremnts and then insert
+destination u need to create a new table for the above requiremnts and then insert as per requiremnts asked
 '''
     response = llm.invoke([HumanMessage(content=prompt)])
     return strip_code_block(response.content)
