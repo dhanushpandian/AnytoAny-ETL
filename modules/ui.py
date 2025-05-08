@@ -28,17 +28,20 @@ def db_credential_input(prefix, db_type):
 #         st.text("🧪 Sample Rows:")
 #         st.dataframe(preview)
 def display_schema_preview(role, preview, schema, role_color="gray"):
-    st.subheader(f"🔍 {role} Preview", divider=role_color)
-    st.text("📘 Schema:")
-    st.json(schema)
+    if preview and schema:
+        st.subheader(f"🔍 {role} Preview", divider=role_color)
+        st.text("📘 Schema:")
+        st.json(schema)
 
-    if preview:
-        st.text("🧪 Sample Rows:")
-        if isinstance(preview, list) and isinstance(preview[0], dict):
-            df = pd.DataFrame(preview)
-        else:
-            df = pd.DataFrame(preview, columns=[col["name"] for col in schema])
-        st.dataframe(df)
+        if preview:
+            st.text("🧪 Sample Rows:")
+            if isinstance(preview, list) and isinstance(preview[0], dict):
+                df = pd.DataFrame(preview)
+            else:
+                df = pd.DataFrame(preview, columns=[col["name"] for col in schema])
+            st.dataframe(df)
+    # else:
+
 
 
 def transformation_input():

@@ -56,35 +56,34 @@ if st.button("🔍 Validate and Preview Schema"):
     #     st.write(src_preview)
 
 # --- Step 3: Input transformation rules and generate code ---
-    st.subheader("🛠️ Describe Transformations")
-    transformations = st.text_area("What changes should be made to the data?", 
-        placeholder="e.g., Change column 'created_at' format, drop rows where salary is null...")
+st.subheader("🛠️ Describe Transformations")
+transformations = st.text_area("What changes should be made to the data?", placeholder="e.g., Change column 'created_at' format, drop rows where salary is null...")
+    
+if st.button("🧠 Generate ETL Code"):
+    src_status, src_preview ,src_schema = validate_and_fetch_schema(source_type, source_creds)
+    tgt_status, tgt_preview , tgt_schema = validate_and_fetch_schema(target_type, target_creds)
+    etl_code = generate_etl_code(source_type, source_creds, target_type, target_creds, transformations, src_preview, tgt_preview,src_schema,tgt_schema)
+    st.session_state["etl_code"] = etl_code
 
-    if st.button("🧠 Generate ETL Code"):
-        # src_status, src_preview ,src_schema = validate_and_fetch_schema(source_type, source_creds)
-        # tgt_status, tgt_preview , tgt_schema = validate_and_fetch_schema(target_type, target_creds)
-        etl_code = generate_etl_code(source_type, source_creds, target_type, target_creds, transformations, src_preview, tgt_preview)
-        st.session_state["etl_code"] = etl_code
+# --- Step 4: Show editable ETL code and allow execution ---
 
-    # --- Step 4: Show editable ETL code and allow execution ---
+if "etl_code" in st.session_state:
+    st.subheader("📝 Review and Edit Generated Code")
+    edited_code = editable_code_section(st.session_state["etl_code"])
 
-    if "etl_code" in st.session_state:
-        st.subheader("📝 Review and Edit Generated Code")
-        edited_code = editable_code_section(st.session_state["etl_code"])
+    col_run, col_dl = st.columns([1, 3])
+    with col_run:
+        if st.button("▶️ Run ETL Script"):
+            stdout, stderr = run_etl_script(edited_code)
 
-        col_run, col_dl = st.columns([1, 3])
-        with col_run:
-            if st.button("▶️ Run ETL Script"):
-                stdout, stderr = run_etl_script(edited_code)
+            # if stderr:
+            #     st.error("❌ An error occurred during ETL execution:")
+            #     st.code(stderr, language="bash")
+            # else:
+            st.success("✅ ETL process completed successfully!")
+            if stdout:
+                st.text(stdout)
 
-                # if stderr:
-                #     st.error("❌ An error occurred during ETL execution:")
-                #     st.code(stderr, language="bash")
-                # else:
-                st.success("✅ ETL process completed successfully!")
-                if stdout:
-                    st.text(stdout)
-
-        with col_dl:
-            st.download_button("📥 Download ETL Script", edited_code, "etl_script.py", mime="text/x-python")
+    with col_dl:
+        st.download_button("📥 Download ETL Script", edited_code, "etl_script.py", mime="text/x-python")
 

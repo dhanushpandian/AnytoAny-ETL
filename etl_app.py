@@ -43,7 +43,7 @@ if st.button("🔍 Validate and Preview DBs"):
             if st.button("🚀 Run ETL Now"):
                 run_output = run_etl_code(code)
                 st.success("✅ ETL Script Executed")
-                st.text(run_output)
+                #st.text(run_output)
 
             st.download_button("📥 Download Script", code, file_name="etl_script.py", mime="text/x-python")
     else:

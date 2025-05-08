@@ -218,7 +218,7 @@ def validate_and_fetch_schema(db_type, creds):
             else:
                 schema = []
             status = "Connected to MongoDB successfully!"
-
+        print("====================",status, preview, schema,"=========================")
         return status, preview, schema
 
     except Exception as e:
