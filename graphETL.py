@@ -117,21 +117,21 @@ print("=========================Graph Compiled==================================
 #     "transformations": "Convert 'created_at' to ISO format and rename 'name' to 'username'"
 # })
 
-# graph.invoke({
-#     "source_type": "MongoDB",
-#     "source_creds": {
-#         "uri": "mongodb://localhost:27017",
-#         "database": "mydatabase",
-#         "collection": "customers"
-#     },
-#     "target_type": "MySQL",
-#     "target_creds": {
-#         "host": "localhost",
-#         "port": 3306,
-#         "username": "root",
-#         "password": "admin@123",
-#         "database": "dash",
-#         "table": "cust_graph"
-#     },
-#     "transformations": "Convert 'created_at' to ISO format and rename 'name' to 'username'"
-# })
+graph.invoke({
+    "source_type": "MongoDB",
+    "source_creds": {
+        "uri": "mongodb://localhost:27017",
+        "database": "mydatabase",
+        "collection": "customers"
+    },
+    "target_type": "MySQL",
+    "target_creds": {
+        "host": "localhost",
+        "port": 3306,
+        "username": "root",
+        "password": "admin@123",
+        "database": "dash",
+        "table": "test121"
+    },
+    "transformations": "Convert 'created_at' to ISO format and rename 'name' to 'username'"
+})

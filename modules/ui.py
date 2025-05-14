@@ -19,14 +19,6 @@ def db_credential_input(prefix, db_type):
         creds["table"] = st.text_input(f"{prefix} Table Name")
     return creds
 
-
-# def display_schema_preview(role, preview, schema, role_color):
-#     st.subheader(f"🔍 {role} Preview", divider=role_color)
-#     st.text("📘 Schema:")
-#     st.json(schema)
-#     if preview:
-#         st.text("🧪 Sample Rows:")
-#         st.dataframe(preview)
 def display_schema_preview(role, preview, schema, role_color="gray"):
     if preview and schema:
         st.subheader(f"🔍 {role} Preview", divider=role_color)
@@ -40,9 +32,6 @@ def display_schema_preview(role, preview, schema, role_color="gray"):
             else:
                 df = pd.DataFrame(preview, columns=[col["name"] for col in schema])
             st.dataframe(df)
-    # else:
-
-
 
 def transformation_input():
     st.subheader("✏️ Define Transformation Rules")
@@ -51,19 +40,6 @@ def transformation_input():
 def code_editor_section(code):
     st.subheader("📝 Generated ETL Script")
     return st.text_area("Edit the code below (optional):", value=code, height=400)
-
-# modules/ui.py
-
-# def display_schema_preview(role, preview_data, role_color):
-#     st.subheader(f"🔍 {role} Preview", divider=role_color)
-
-#     if not preview_data or len(preview_data) != 2:
-#         st.warning("⚠️ No schema or preview data available.")
-#         return
-
-#     schema, rows = preview_data
-#     st.write(f"**Schema**: `{schema}`")
-#     st.dataframe(rows)
 
 def editable_code_section(code):
     return st.text_area("Edit the ETL Python code below", value=code, height=400)
